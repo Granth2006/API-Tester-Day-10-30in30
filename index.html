@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Tester (Mini Postman)</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Prism.js for syntax highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" id="prism-theme" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <span>API Tester</span>
+      </div>
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+          <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" data-target="history">History</button>
+          <button class="sidebar-tab" data-target="collections">Collections</button>
+          <button class="sidebar-tab" data-target="env">Env</button>
+        </div>
+
+        <div class="sidebar-content">
+          <!-- History -->
+          <div id="history-panel" class="sidebar-panel active">
+            <ul id="history-list" class="item-list"></ul>
+          </div>
+
+          <!-- Collections -->
+          <div id="collections-panel" class="sidebar-panel">
+            <ul id="collections-list" class="item-list"></ul>
+          </div>
+
+          <!-- Environment -->
+          <div id="env-panel" class="sidebar-panel">
+            <div class="env-header">
+              <span>Variables {{var}}</span>
+              <button id="add-env-btn" class="icon-btn-small">+</button>
+            </div>
+            <div id="env-vars-container"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Request Builder -->
+      <section class="request-builder">
+        <div class="url-bar">
+          <select id="req-method" class="method-select">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+            <option value="PATCH">PATCH</option>
+          </select>
+          <input type="text" id="req-url" placeholder="https://api.example.com/users" />
+          <button id="send-btn" class="btn-primary">Send</button>
+          <button id="save-btn" class="btn-secondary" title="Save Request (Ctrl+S)">Save</button>
+        </div>
+
+        <div class="request-tabs tabs">
+          <button class="tab-btn active" data-target="req-params">Params</button>
+          <button class="tab-btn" data-target="req-headers">Headers</button>
+          <button class="tab-btn" data-target="req-body">Body</button>
+        </div>
+
+        <div class="request-panels">
+          <!-- Params Form -->
+          <div id="req-params" class="tab-panel active">
+            <div class="key-value-editor" id="params-editor"></div>
+            <button class="add-kv-btn" data-target="params-editor">+ Add Param</button>
+          </div>
+
+          <!-- Headers Form -->
+          <div id="req-headers" class="tab-panel">
+            <div class="key-value-editor" id="headers-editor"></div>
+            <button class="add-kv-btn" data-target="headers-editor">+ Add Header</button>
+          </div>
+
+          <!-- Body JSON -->
+          <div id="req-body" class="tab-panel">
+            <div class="body-toolbar">
+              <span>JSON</span>
+              <button id="format-json-btn" class="text-btn">Format JSON</button>
+            </div>
+            <textarea id="req-body-text" class="code-editor" placeholder="{&#10;  &#34;key&#34;: &#34;value&#34;&#10;}"></textarea>
+            <div id="req-body-error" class="error-text"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Response Viewer -->
+      <section class="response-viewer">
+        <div class="response-meta">
+          <div class="status-badge" id="res-status">Status: 0</div>
+          <div class="meta-info">
+            <span id="res-time">Time: 0 ms</span>
+            <span class="dot">•</span>
+            <span id="res-size">Size: 0 B</span>
+          </div>
+        </div>
+
+        <div class="response-tabs tabs">
+          <button class="tab-btn active" data-target="res-body">Response Body</button>
+          <button class="tab-btn" data-target="res-headers">Headers</button>
+        </div>
+
+        <div class="response-panels">
+          <div class="res-actions">
+            <button id="copy-res-btn" class="icon-btn-small" title="Copy Response">Copy</button>
+            <button id="export-res-btn" class="icon-btn-small" title="Export as JSON">Export</button>
+          </div>
+          
+          <!-- Response Body -->
+          <div id="res-body" class="tab-panel active code-container">
+            <pre><code id="res-body-content" class="language-json">No response yet.</code></pre>
+          </div>
+
+          <!-- Response Headers -->
+          <div id="res-headers" class="tab-panel code-container">
+            <pre><code id="res-headers-content" class="language-json"></code></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="kv-row-template">
+    <div class="kv-row">
+      <input type="text" class="kv-key" placeholder="Key" />
+      <input type="text" class="kv-val" placeholder="Value" />
+      <button class="kv-remove-btn" title="Remove">&times;</button>
+    </div>
+  </template>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  
+  <script type="module" src="app.js"></script>
+</body>
+</html>
